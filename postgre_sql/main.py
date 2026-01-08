@@ -1,26 +1,36 @@
-from fastapi import FastAPI, Depends 
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError 
 from sqlalchemy.orm import Session 
 
-from database import sessionLocal
+from database import SessionLocal
 from models import User 
+
+from schemas import UserCreate, UserResponse
 
 app = FastAPI()
 
 def get_db():
-    db = sessionLocal()
+    db = SessionLocal()
     try:
         yield db 
     finally:
         db.close()
 
-@app.post("/users/")
-def create_user(name: str, email: str, db: Session = Depends(get_db)):
-    user = User(name=name, email=email)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user 
+@app.post("/users/", response_model=UserResponse)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = User(**user.dict())
+    db.add(db_user)
+    try:
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="Email already exists"
+        )
 
-@app.get("/users/")
+@app.get("/users/", response_model=list[UserResponse])
 def get_users(db: Session = Depends(get_db)):
     return db.query(User).all()

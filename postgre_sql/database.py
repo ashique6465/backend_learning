@@ -3,6 +3,6 @@ from sqlalchemy.orm import  sessionmaker, declarative_base
 DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/testdb"
 
 engine = create_engine(DATABASE_URL)
-sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
