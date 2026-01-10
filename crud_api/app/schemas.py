@@ -3,10 +3,15 @@ from pydantic import BaseModel, EmailStr
 class UserCreate(BaseModel):
     name: str 
     email: EmailStr
+    password: str
 
-class UserUpdate(BaseModel):
-    name: str 
+# class UserUpdate(BaseModel):
+#     name: str 
+#     email: EmailStr
+
+class UserLogin(BaseModel):
     email: EmailStr
+    password: str
 
 class UserResponse(BaseModel):
     id: int
@@ -15,3 +20,6 @@ class UserResponse(BaseModel):
 
     class config:
         orm_mode = True
+class Token(BaseModel):
+    access_token: str
+    token_type: str
