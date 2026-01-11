@@ -25,7 +25,7 @@ def get_current_user(
         raise HTTPException(
             status_code=401, detail="Invalid token"
         )
-    user = get_user_by_id(db, user_id)
+    user = get_user_by_id(db, int(user_id))
     if not user:
         raise HTTPException(
             status_code=401, detail= "User not found"

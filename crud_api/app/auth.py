@@ -22,7 +22,7 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
             status_code=401, detail="Invalid credentials"
         )
     token = create_access_token(
-        data={"sub": authenticate_user.id}
+        data={"sub": str(authenticate_user.id)}
     )
 
     return {"access_token": token, "token_type": "bearer"}

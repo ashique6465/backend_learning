@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends
 # from sqlalchemy.orm import Session
 
 from .database import Base, engine
+from . import models
 # from .database import get_db
 # from . import models, schemas, crud 
 from .auth import router as auth_router
