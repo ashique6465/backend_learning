@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 SECRET_KEY = "secret"
 ALGORITHM = "HS256"
+TOKEN_BLACKLIST = set()
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 
@@ -24,4 +25,8 @@ def create_access_token(data: dict):
     payload["exp"] = datetime.utcnow() + timedelta(minutes=30)
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
+def blacklist_token(token: str):
+    TOKEN_BLACKLIST.add(token)
 
+def is_token_blacklisted(token:str) -> bool:
+    return token in TOKEN_BLACKLIST
