@@ -19,17 +19,24 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 def register(user: UserCreate):
     if user.email in fake_db:
         raise HTTPException(status_code=400, detail="User exists")
-    fake_db[user.email] = hash_password(user.password)
+    fake_db[user.email] = {
+        "password":
+        hash_password(user.password),
+        "role": user.role
+        }
     return {"message": "registered"}
 
 
 @router.post("/login")
 def login(user: UserCreate):
-    hashed = fake_db.get(user.email)
-    if not hashed or not verify_password(user.password,hashed):
+    user_record = fake_db.get(user.email)
+    if not user_record or not verify_password(user.password, user_record["password"]):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    token = create_access_token({"sub": user.email})
+    token = create_access_token({
+        "sub": user.email,
+        "role": user_record["role"]
+    })
     refresh_token = create_refresh_token()
     ReFRESH_TOKENS[refresh_token] = user.email
     return {
@@ -57,8 +64,22 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     if is_token_blacklisted(token):
         raise HTTPException(status_code=401, detail="Token revoked")
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    return payload["sub"]
+    return {
+        "email": payload["sub"],
+        "role": payload["role"]
+    }
 
+def require_role(require_role: str):
+    def checker(user=Depends(get_current_user)):
+        if user["role"] != require_role:
+            raise HTTPException(status_code=403,detail="Forbidden")
+        return user
+    return checker
+
+
+@router.get("/admin")
+def admin_only(user=Depends(require_role("admin"))):
+    return {"message": f"Welcome admin {user['email']}"}
 
 
 @router.get("/protected")
