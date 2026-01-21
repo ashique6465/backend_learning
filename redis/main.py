@@ -1,34 +1,37 @@
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Response, Depends
 from rate_limiter import rate_limiter
-from cache import get_cache, set_cache
-import time
+from db import get_all_products, add_product
+from cache import (
+    get_products_cache,
+    set_products_cache,
+    invalidate_products_cache
+)
 
 app = FastAPI(title="Redis Rate Limited & Cached API")
 
 
-@app.get("/")
-def home(
-    request: Request,
+@app.get("/products")
+def get_products(
+    response: Response,
     _: None = Depends(rate_limiter)
 ):
-    return {"message": "Request allowed"}
 
+    #CDN
+    response.headers["Cache-Control"] = "public, max-age=120"
 
-@app.get("/data")
-def get_data(
-    request: Request,
-    _: None = Depends(rate_limiter)
-):
-    cached = get_cache(request)
-    if cached:
+    #Redis cache-aside
+    cached = get_products_cache()
+    if cached :
         return cached
+    products = get_all_products()
+    set_products_cache(products)
+    return products
 
-    time.sleep(3)
-
-    response = {
-        "data": "Expensive data",
-        "timestamp": time.time()
-    }
-
-    set_cache(request,response)
-    return response
+@app.post("/products")
+def create_product(
+    product: dict,
+    _: None = Depends(rate_limiter)
+):
+    add_product(product)
+    invalidate_products_cache()
+    return {"status": "product created"}

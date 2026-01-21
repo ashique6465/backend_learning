@@ -1,26 +1,26 @@
 import json
-import time 
-from fastapi import Request
 from redis_client import redis_client
 
-CACHE_TTL = 30 #Seconds
 
-def get_cache(request: Request):
-    cache_key = f"cache:{request.url}"
+PRODUCTS_CACHE_KEY = "products:list:v1"
+CACHE_TTL = 60 
 
-    cached_data = redis_client.get(cache_key)
+def get_products_cache():
+    cached_data = redis_client.get(PRODUCTS_CACHE_KEY)
+
     if cached_data:
-        print("CACHE HIT")
+        print("REDIS CACHE HIT")
         return json.loads(cached_data)
 
-    print("CACHE MISS")
+    print("REDIS CACHE MISS")
     return None
 
-def set_cache(request: Request, response: dict):
-    cache_key = f"cache:{request.url}"
-
+def set_products_cache(products: list):
     redis_client.setex(
-        cache_key,
+        PRODUCTS_CACHE_KEY,
         CACHE_TTL,
-        json.dumps(response)
+        json.dumps(products)
     )
+
+def invalidate_products_cache():
+    redis_client.delete(PRODUCTS_CACHE_KEY)
