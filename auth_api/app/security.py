@@ -8,6 +8,17 @@ ALGORITHM = "HS256"
 TOKEN_BLACKLIST = set()
 ReFRESH_TOKENS = {}
 
+ROLE_PERMISSIONS = {
+    "admin": [
+        "user:read",
+        "user:delete",
+        "analytics:view"
+    ],
+    "user": [
+        "user:read"
+    ]
+}
+
 pwd_context = CryptContext(schemes=["bcrypt"])
 
 def hash_password(password: str):
