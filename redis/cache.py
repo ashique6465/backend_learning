@@ -24,3 +24,4 @@ def set_products_cache(products: list):
 
 def invalidate_products_cache():
     redis_client.delete(PRODUCTS_CACHE_KEY)
+    print("Cache Invalidated")

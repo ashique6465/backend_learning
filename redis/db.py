@@ -1,6 +1,6 @@
 FAKE_DB = [
-    {"id": 1 , "name": "iphone", "price": 70000},
-    {"id":2, "name": "MacBook", "price": 120000}
+#     {"id": 1 , "name": "iphone", "price": 70000},
+#     {"id":2, "name": "MacBook", "price": 120000}
 ]
 
 def get_all_products():
