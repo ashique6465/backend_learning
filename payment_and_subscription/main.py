@@ -1,4 +1,5 @@
 import os 
+import json
 import stripe
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -78,19 +79,22 @@ def cancel():
 @app.post("/webhook")
 async def stripe_webhook(request: Request):
     payload = await request.body()
-    sig_header = request.headers.get("stripe-signature")
 
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, WEBHOOK_SECRET
-        )
+    # ✅ TEMPORARY: skip signature verification (learning mode)
+    event = stripe.Event.construct_from(
+        json.loads(payload.decode("utf-8")), stripe.api_key
+    )
 
-    except Exception:
-        return JSONResponse({"error": "Invalid signature"}, status_code=400)
+    print("🔔 Webhook received:", event["type"])
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
+        print("✅ Payment confirmed for:", session.get("id"))
 
-        print("Payment confirmed for:", session["id"])
+        # 👉 HERE is real backend work:
+        # - update DB
+        # - mark order SUCCESS
+        # - send email
+        # - unlock content
 
-    return {"status": "success"}
+    return {"status": "ok"}
