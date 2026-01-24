@@ -4,6 +4,7 @@ import stripe
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from dotenv import load_dotenv
+from rabbitmq import publish_payment_success
 
 load_dotenv()
 
@@ -91,10 +92,10 @@ async def stripe_webhook(request: Request):
         session = event["data"]["object"]
         print("✅ Payment confirmed for:", session.get("id"))
 
-        # 👉 HERE is real backend work:
-        # - update DB
-        # - mark order SUCCESS
-        # - send email
-        # - unlock content
+        publish_payment_success({
+            "order_id": session.get("id"),
+            "status": "SUCCESS"
+        })
 
+        
     return {"status": "ok"}
