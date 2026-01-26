@@ -5,6 +5,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from dotenv import load_dotenv
 from rabbitmq import publish_payment_success
+from database import SessionLocal
+from models import Order
 
 load_dotenv()
 
@@ -45,6 +47,12 @@ def home():
 
 @app.post("/create-checkout-session")
 def create_checkout_session():
+    db = SessionLocal()
+    
+    order = Order(status="PENDING")
+    db.add(order)
+    db.commit()
+    db.refresh(order)
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         line_items=[
@@ -60,9 +68,13 @@ def create_checkout_session():
             }
         ],
         mode="payment",
-        success_url="http://localhost:8000/success",
-        cancel_url="http://localhost:8000/cancel",
+        success_url="https://special-space-broccoli-979x5vq5jw95hxw97-8000.app.github.dev/success",
+        cancel_url="https://special-space-broccoli-979x5vq5jw95hxw97-8000.app.github.dev/cancel",
     )
+
+    order.stripe_session_id = session.id 
+    db.commit()
+
     return JSONResponse({"url": session.url})
 
 @app.get("/success", response_class=HTMLResponse)
@@ -80,22 +92,37 @@ def cancel():
 @app.post("/webhook")
 async def stripe_webhook(request: Request):
     payload = await request.body()
+    sig =request.headers.get("stripe-signature")
 
     # ✅ TEMPORARY: skip signature verification (learning mode)
     event = stripe.Event.construct_from(
-        json.loads(payload.decode("utf-8")), stripe.api_key
+        await request.json(),
+        stripe.api_key
     )
 
     print("🔔 Webhook received:", event["type"])
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        print("✅ Payment confirmed for:", session.get("id"))
+        db = SessionLocal()
+        order = db.query(Order).filter(
+            Order.stripe_session_id == session["id"]
+        ).first()
 
-        publish_payment_success({
-            "order_id": session.get("id"),
-            "status": "SUCCESS"
-        })
+        if order and order.status != "PAID":
+            order.status = "PAID"
+            db.commit()
+
+            publish_payment_success({
+                "order_id": order.id
+            })
+
+        # print("✅ Payment confirmed for:", session.get("id"))
+
+        # publish_payment_success({
+        #     "order_id": session.get("id"),
+        #     "status": "SUCCESS"
+        # })
 
         
     return {"status": "ok"}
