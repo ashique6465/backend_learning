@@ -68,8 +68,8 @@ def create_checkout_session():
             }
         ],
         mode="payment",
-        success_url="https://special-space-broccoli-979x5vq5jw95hxw97-8000.app.github.dev/success",
-        cancel_url="https://special-space-broccoli-979x5vq5jw95hxw97-8000.app.github.dev/cancel",
+        success_url="https://fact-michelle-writes-fork.trycloudflare.com/success",
+        cancel_url="https://fact-michelle-writes-fork.trycloudflare.com/cancel",
     )
 
     order.stripe_session_id = session.id 
@@ -92,24 +92,28 @@ def cancel():
 @app.post("/webhook")
 async def stripe_webhook(request: Request):
     payload = await request.body()
-    sig =request.headers.get("stripe-signature")
+    sig = request.headers.get("stripe-signature")
 
-    # ✅ TEMPORARY: skip signature verification (learning mode)
-    event = stripe.Event.construct_from(
-        await request.json(),
-        stripe.api_key
-    )
+    try:
+        event = stripe.Webhook.construct_event(
+            payload,
+            sig,
+            WEBHOOK_SECRET
+        )
+    except Exception as e:
+        return {"error": str(e)}
 
     print("🔔 Webhook received:", event["type"])
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
+
         db = SessionLocal()
         order = db.query(Order).filter(
             Order.stripe_session_id == session["id"]
         ).first()
 
-        if order and order.status != "PAID":
+        if order:
             order.status = "PAID"
             db.commit()
 
@@ -117,12 +121,4 @@ async def stripe_webhook(request: Request):
                 "order_id": order.id
             })
 
-        # print("✅ Payment confirmed for:", session.get("id"))
-
-        # publish_payment_success({
-        #     "order_id": session.get("id"),
-        #     "status": "SUCCESS"
-        # })
-
-        
     return {"status": "ok"}
