@@ -1,0 +1,80 @@
+name: Redis API Docker Build & Push
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'redis/**'
+      - '.github/workflows/redis-docker-build.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'redis/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: ./redis
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with flake8
+        working-directory: ./redis
+        run: |
+          pip install flake8
+          # Stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        continue-on-error: true
+
+      - name: Build Docker image
+        run: |
+          docker build -t redis-api:${{ github.sha }} ./redis
+          docker tag redis-api:${{ github.sha }} redis-api:latest
+
+      - name: Test Docker container
+        run: |
+          docker compose -f redis/docker-compose.yml up -d
+          sleep 10
+          docker compose -f redis/docker-compose.yml ps
+          docker compose -f redis/docker-compose.yml down
+
+      - name: Login to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag redis-api:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/redis-api:${{ github.sha }}
+          docker tag redis-api:latest ${{ secrets.DOCKER_USERNAME }}/redis-api:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/redis-api:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/redis-api:latest
