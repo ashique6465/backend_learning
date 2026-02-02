@@ -9,7 +9,7 @@ producer = KafkaProducer(
     value_serializer= lambda v: json.dumps(v).encode("utf-8")
 )
 
-
+#placing order endpoint
 @app.post("/order")
 def place_order(order_id: int, email: str):
     event = {

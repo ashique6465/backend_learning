@@ -45,6 +45,7 @@ def home():
     </html>
     """
 
+#create checkout session
 @app.post("/create-checkout-session")
 def create_checkout_session():
     db = SessionLocal()

@@ -2,6 +2,8 @@ from kafka import KafkaConsumer
 import json 
 import time 
 
+
+#consumer setup
 consumer = KafkaConsumer(
     "order-events",
     bootstrap_servers="localhost:9092",
