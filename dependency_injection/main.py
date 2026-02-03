@@ -19,7 +19,7 @@ def log_message(message: str,logger: Logger = Depends(get_logger)):
 
 
 
-
+#email service
 class EmailService:
     def send_email(self,recipient: str, message: str):
         print(f"Sending email to {recipient}    : {message}")
