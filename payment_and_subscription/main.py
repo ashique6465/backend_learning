@@ -77,12 +77,12 @@ def create_checkout_session():
     db.commit()
 
     return JSONResponse({"url": session.url})
-
+#success route
 @app.get("/success", response_class=HTMLResponse)
 def success():
     return "<h1>Payment Successful</h1>"
 
-
+#cancel route
 @app.get("/cancel", response_class=HTMLResponse)
 def cancel():
     return "<h1>Payment Cancelled</h1>"
