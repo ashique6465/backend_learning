@@ -1,6 +1,7 @@
 import pika 
 import json
 
+#path: payment_and_subscription
 def publish_payment_success(message: dict):
     print("📤 Publishing message to RabbitMQ:", message)
     connection = pika.BlockingConnection(
