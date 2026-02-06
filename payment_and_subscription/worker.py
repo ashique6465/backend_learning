@@ -15,6 +15,7 @@ print("EMAIL:", EMAIL_ADDRESS)
 print("PASS LENGTH:", len(EMAIL_PASSWORD))
 
 
+#sending the real email using smtplib
 def send_email(order_id):
     msg = EmailMessage()
     msg["Subject"] = "Payment Successful ✅"
