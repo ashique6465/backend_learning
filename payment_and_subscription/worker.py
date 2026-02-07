@@ -39,6 +39,8 @@ Thank you for your purchase 🚀
 
     print("📧 Real email sent!")
 
+
+#starting the worker to listen for payment events and send emails
 def start_worker():
     print("🚀 Worker starting...")
 
