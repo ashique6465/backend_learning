@@ -5,7 +5,7 @@ from redis_client import redis_client
 RATE_LIMIT = 5 
 WINDOW_SIZE = 30
 
-
+#Rate limiter function to be used as a dependency in FastAPI routes.
 def rate_limiter(request: Request):
     print("RATE LIMITER CALLED")
 
