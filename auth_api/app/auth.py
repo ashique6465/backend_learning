@@ -17,6 +17,7 @@ fake_db = {}
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
+#register
 @router.post("/register")
 def register(user: UserCreate):
     if user.email in fake_db:
@@ -28,7 +29,7 @@ def register(user: UserCreate):
         }
     return {"message": "registered"}
 
-
+#login
 @router.post("/login")
 def login(user: UserCreate):
     user_record = fake_db.get(user.email)
@@ -50,6 +51,8 @@ def login(user: UserCreate):
     
     }
 
+
+#refresh token
 @router.post("/refresh")
 def refresh_token(refresh_token: str):
     email = ReFRESH_TOKENS.get(refresh_token)
