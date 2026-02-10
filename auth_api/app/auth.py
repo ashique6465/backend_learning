@@ -63,13 +63,13 @@ def refresh_token(refresh_token: str):
         )
         new_access_token = create_access_token({"sub": email})
         return {"access_token": new_access_token}
-
+#logout
 @router.post("/logout")
 def logout(refresh_token: str):
     ReFRESH_TOKENS.pop(refresh_token, None)
     return {"message": "Logged out successfully"}
 
-
+#get current user
 def get_current_user(token: str = Depends(oauth2_scheme)):
     if is_token_blacklisted(token):
         raise HTTPException(status_code=401, detail="Token revoked")
@@ -79,7 +79,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         "role": payload["role"],
         "permissions": payload.get("permissions", [])
     }
-
+#permission and role checks
 def require_permission(required_permission: str):
     def checker(user=Depends(get_current_user)):
         if required_permission not in user["permissions"]:
