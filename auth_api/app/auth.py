@@ -90,6 +90,7 @@ def require_permission(required_permission: str):
         return user 
     return checker
 
+#role check
 def require_role(require_role: str):
     def checker(user=Depends(get_current_user)):
         if user["role"] != require_role:
