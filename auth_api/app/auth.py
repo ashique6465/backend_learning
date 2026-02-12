@@ -99,6 +99,7 @@ def require_role(require_role: str):
     return checker
 
 
+#admin only endpoint
 @router.get("/admin")
 def admin_only(user=Depends(require_role("admin"))):
     return {"message": f"Welcome admin {user['email']}"}
