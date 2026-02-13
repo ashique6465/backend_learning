@@ -104,6 +104,8 @@ def require_role(require_role: str):
 def admin_only(user=Depends(require_role("admin"))):
     return {"message": f"Welcome admin {user['email']}"}
 
+
+#admin user management
 @router.get("/admin/users")
 def list_users(
     user = Depends(require_permission("user:read"))
@@ -111,7 +113,7 @@ def list_users(
 
     return fake_db
 
-
+#admin user deletion
 @router.delete("/admin/users/{email}")
 def delete_user(
     email: str , 
