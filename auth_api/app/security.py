@@ -21,6 +21,8 @@ ROLE_PERMISSIONS = {
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 
+
+# Password hashing and verification
 def hash_password(password: str):
     password = password[:72]
     return pwd_context.hash(password)
