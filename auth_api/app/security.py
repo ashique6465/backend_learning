@@ -28,7 +28,7 @@ def hash_password(password: str):
     return pwd_context.hash(password)
 
 
-
+# verify password
 def verify_password(password: str , hashed: str):
     password = password[:72]
     return pwd_context.verify(password,hashed)
