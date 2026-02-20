@@ -33,7 +33,7 @@ def verify_password(password: str , hashed: str):
     password = password[:72]
     return pwd_context.verify(password,hashed)
 
-
+#create token
 def create_access_token(data: dict):
     payload = data.copy()
     payload["exp"] = datetime.utcnow() + timedelta(minutes=15)
