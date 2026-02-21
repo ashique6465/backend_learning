@@ -39,9 +39,11 @@ def create_access_token(data: dict):
     payload["exp"] = datetime.utcnow() + timedelta(minutes=15)
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
+# create refresh token
 def create_refresh_token():
     return secrets.token_urlsafe(32)
 
+#blacklist token
 def blacklist_token(token: str):
     TOKEN_BLACKLIST.add(token)
 
