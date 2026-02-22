@@ -47,5 +47,6 @@ def create_refresh_token():
 def blacklist_token(token: str):
     TOKEN_BLACKLIST.add(token)
 
+#check if token is blacklisted
 def is_token_blacklisted(token:str) -> bool:
     return token in TOKEN_BLACKLIST
