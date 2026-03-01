@@ -10,6 +10,8 @@ from .crud import get_user_by_id
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+
+#Dependency to get current user from token
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
