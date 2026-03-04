@@ -14,6 +14,7 @@ Base.metadata.create_all(bind=engine)
 app =FastAPI()
 app.include_router(auth_router)
 
+#protected route 
 @app.get("/protected")
 def protected_route(current_user=Depends(get_current_user)):
     return {
