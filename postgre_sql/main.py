@@ -16,6 +16,7 @@ def get_db():
     finally:
         db.close()
 
+# Create a new user
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = User(**user.dict())
