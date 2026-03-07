@@ -9,7 +9,7 @@ from cache import (
 
 app = FastAPI(title="Redis Rate Limited & Cached API")
 
-
+# The GET endpoint checks redis cache
 @app.get("/products")
 def get_products(
     response: Response,
