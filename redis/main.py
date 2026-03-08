@@ -27,6 +27,7 @@ def get_products(
     set_products_cache(products)
     return products
 
+# The POST endpoint invalidates the cache after creating a new product
 @app.post("/products")
 def create_product(
     product: dict,
