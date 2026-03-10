@@ -4,6 +4,7 @@ users = [
     {"id":i, "name": f"user{i}"} for i in range(1,101)
 ]
 
+#get users
 @app.get("/users")
 def get_users(
     page: int = 1,
